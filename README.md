@@ -1,0 +1,2 @@
+# mytrades
+Trading Journal
