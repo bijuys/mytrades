@@ -62,6 +62,8 @@ class TradeJournalTest extends TestCase
         $response->assertSee('Log Journal Entry');
         $response->assertSee('Execution Numbers');
         $response->assertSee('Automatically converted to WebP format');
+        $response->assertSee('rows="5"', false);
+        $response->assertSee('Charges & Brokerage (₹)', false);
     }
 
     public function test_user_can_store_trade_with_auto_pnl_and_webp_screenshot(): void
@@ -131,7 +133,7 @@ class TradeJournalTest extends TestCase
         $response = $this->actingAs($this->user)->get(route('trades.show', $trade));
         $response->assertStatus(200);
         $response->assertSee('NIFTY 50');
-        $response->assertSee('+4,950.00');
+        $response->assertSee('+₹4,950.00');
     }
 
     public function test_user_can_edit_and_update_trade(): void

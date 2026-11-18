@@ -35,12 +35,12 @@
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <!-- Net PnL -->
         <div class="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm col-span-2 sm:col-span-1 lg:col-span-2">
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Net P&L</div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Net P&L (₹)</div>
             <div class="text-2xl sm:text-3xl font-black {{ $totalNetPnl > 0 ? 'text-emerald-600 dark:text-emerald-400' : ($totalNetPnl < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-slate-100') }}">
-                {{ $totalNetPnl >= 0 ? '+' : '' }}{{ number_format($totalNetPnl, 2) }}
+                {{ $totalNetPnl >= 0 ? '+₹' : '-₹' }}{{ number_format(abs($totalNetPnl), 2) }}
             </div>
             <div class="text-xs text-slate-400 mt-1">
-                Gross: <span class="font-semibold text-slate-600 dark:text-slate-300">{{ number_format($totalGrossPnl, 2) }}</span> • Fees: <span class="font-semibold text-slate-600 dark:text-slate-300">{{ number_format($totalCharges, 2) }}</span>
+                Gross: <span class="font-semibold text-slate-600 dark:text-slate-300">₹{{ number_format($totalGrossPnl, 2) }}</span> • Fees: <span class="font-semibold text-slate-600 dark:text-slate-300">₹{{ number_format($totalCharges, 2) }}</span>
             </div>
         </div>
 
@@ -131,7 +131,7 @@
                                 <th class="pb-3">Strategy</th>
                                 <th class="pb-3 text-center">Trades</th>
                                 <th class="pb-3 text-center">Win %</th>
-                                <th class="pb-3 text-right">Net P&L</th>
+                                <th class="pb-3 text-right">Net P&L (₹)</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -152,7 +152,7 @@
                                         </span>
                                     </td>
                                     <td class="py-3 text-right font-mono font-bold {{ $stat['net_pnl'] > 0 ? 'text-emerald-600 dark:text-emerald-400' : ($stat['net_pnl'] < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-600') }}">
-                                        {{ $stat['net_pnl'] >= 0 ? '+' : '' }}{{ number_format($stat['net_pnl'], 2) }}
+                                        {{ $stat['net_pnl'] >= 0 ? '+₹' : '-₹' }}{{ number_format(abs($stat['net_pnl']), 2) }}
                                     </td>
                                 </tr>
                             @endforeach
@@ -206,7 +206,7 @@
                             </div>
                             <div class="text-right">
                                 <div class="font-mono font-black text-base {{ $inst['net_pnl'] > 0 ? 'text-emerald-600 dark:text-emerald-400' : ($inst['net_pnl'] < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-600') }}">
-                                    {{ $inst['net_pnl'] >= 0 ? '+' : '' }}{{ number_format($inst['net_pnl'], 2) }}
+                                    {{ $inst['net_pnl'] >= 0 ? '+₹' : '-₹' }}{{ number_format(abs($inst['net_pnl']), 2) }}
                                 </div>
                             </div>
                         </div>
@@ -234,7 +234,7 @@
                             <span class="text-xs font-bold text-emerald-700 dark:text-emerald-300">{{ $directionStats['BUY']['win_rate'] }}% Win Rate</span>
                         </div>
                         <div class="text-xl font-black text-slate-800 dark:text-slate-100 mt-1">
-                            {{ $directionStats['BUY']['net_pnl'] >= 0 ? '+' : '' }}{{ number_format($directionStats['BUY']['net_pnl'], 2) }}
+                            {{ $directionStats['BUY']['net_pnl'] >= 0 ? '+₹' : '-₹' }}{{ number_format(abs($directionStats['BUY']['net_pnl']), 2) }}
                         </div>
                         <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                             {{ $directionStats['BUY']['total'] }} trades ({{ $directionStats['BUY']['wins'] }}W / {{ $directionStats['BUY']['losses'] }}L)
@@ -248,7 +248,7 @@
                             <span class="text-xs font-bold text-rose-700 dark:text-rose-300">{{ $directionStats['SELL']['win_rate'] }}% Win Rate</span>
                         </div>
                         <div class="text-xl font-black text-slate-800 dark:text-slate-100 mt-1">
-                            {{ $directionStats['SELL']['net_pnl'] >= 0 ? '+' : '' }}{{ number_format($directionStats['SELL']['net_pnl'], 2) }}
+                            {{ $directionStats['SELL']['net_pnl'] >= 0 ? '+₹' : '-₹' }}{{ number_format(abs($directionStats['SELL']['net_pnl']), 2) }}
                         </div>
                         <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                             {{ $directionStats['SELL']['total'] }} trades ({{ $directionStats['SELL']['wins'] }}W / {{ $directionStats['SELL']['losses'] }}L)
@@ -263,7 +263,7 @@
                     <div class="flex items-center justify-between">
                         <span class="text-slate-400 font-medium">Best Trade:</span>
                         <a href="{{ route('trades.show', $bestTrade) }}" class="font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
-                            +{{ number_format($bestTrade->net_pnl, 2) }} ({{ $bestTrade->instrument }})
+                            +₹{{ number_format(abs($bestTrade->net_pnl), 2) }} ({{ $bestTrade->instrument }})
                         </a>
                     </div>
                 @endif
@@ -271,7 +271,7 @@
                     <div class="flex items-center justify-between">
                         <span class="text-slate-400 font-medium">Worst Trade:</span>
                         <a href="{{ route('trades.show', $worstTrade) }}" class="font-bold text-rose-600 dark:text-rose-400 hover:underline">
-                            {{ number_format($worstTrade->net_pnl, 2) }} ({{ $worstTrade->instrument }})
+                            {{ $worstTrade->net_pnl >= 0 ? '+₹' : '-₹' }}{{ number_format(abs($worstTrade->net_pnl), 2) }} ({{ $worstTrade->instrument }})
                         </a>
                     </div>
                 @endif
@@ -313,7 +313,7 @@
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return 'Net P&L: ' + (context.raw >= 0 ? '+' : '') + context.raw;
+                            return 'Net P&L: ' + (context.raw >= 0 ? '+₹' : '-₹') + Math.abs(context.raw).toFixed(2);
                         }
                     }
                 }

@@ -190,7 +190,7 @@
                             <th class="py-3 px-3">Instrument</th>
                             <th class="py-3 px-3">Direction</th>
                             <th class="py-3 px-3">Qty × Entry</th>
-                            <th class="py-3 px-3 text-right">Net P&L</th>
+                            <th class="py-3 px-3 text-right">Net P&L (₹)</th>
                             <th class="py-3 px-3 text-center">Chart</th>
                             <th class="py-3 px-3 text-right">Logged At</th>
                         </tr>
@@ -213,7 +213,7 @@
                                     {{ $trade->quantity }} @ {{ number_format($trade->entry_price, 2) }}
                                 </td>
                                 <td class="py-3 px-3 text-right font-mono font-bold {{ $trade->net_pnl > 0 ? 'text-emerald-600 dark:text-emerald-400' : ($trade->net_pnl < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-600') }}">
-                                    {{ $trade->net_pnl >= 0 ? '+' : '' }}{{ number_format($trade->net_pnl, 2) }}
+                                    {{ $trade->net_pnl >= 0 ? '+₹' : '-₹' }}{{ number_format(abs($trade->net_pnl), 2) }}
                                 </td>
                                 <td class="py-3 px-3 text-center">
                                     @if($trade->screenshot)

@@ -52,9 +52,9 @@
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <!-- Net PnL -->
         <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Net Profit / Loss</div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Net Profit / Loss (₹)</div>
             <div class="text-2xl sm:text-3xl font-black {{ $trade->net_pnl > 0 ? 'text-emerald-600 dark:text-emerald-400' : ($trade->net_pnl < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-300') }}">
-                {{ $trade->net_pnl >= 0 ? '+' : '' }}{{ number_format($trade->net_pnl, 2) }}
+                {{ $trade->net_pnl >= 0 ? '+₹' : '-₹' }}{{ number_format(abs($trade->net_pnl), 2) }}
             </div>
             <div class="text-xs font-semibold mt-1 {{ $trade->net_pnl >= 0 ? 'text-emerald-600/80 dark:text-emerald-400/80' : 'text-rose-600/80 dark:text-rose-400/80' }}">
                 ROI: {{ $trade->roi }}%
@@ -63,18 +63,18 @@
 
         <!-- Gross PnL -->
         <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Gross Profit / Loss</div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Gross Profit / Loss (₹)</div>
             <div class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100">
-                {{ $trade->gross_pnl >= 0 ? '+' : '' }}{{ number_format($trade->gross_pnl, 2) }}
+                {{ $trade->gross_pnl >= 0 ? '+₹' : '-₹' }}{{ number_format(abs($trade->gross_pnl), 2) }}
             </div>
             <div class="text-xs text-slate-400 mt-1">Pre-charges execution</div>
         </div>
 
         <!-- Charges -->
         <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Charges & Taxes</div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Charges & Taxes (₹)</div>
             <div class="text-2xl sm:text-3xl font-black text-slate-700 dark:text-slate-200">
-                {{ number_format($trade->charges, 2) }}
+                ₹{{ number_format($trade->charges, 2) }}
             </div>
             <div class="text-xs text-slate-400 mt-1">Brokerage, STT, turnover</div>
         </div>

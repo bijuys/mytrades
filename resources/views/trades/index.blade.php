@@ -31,12 +31,12 @@
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Net P&L -->
         <div class="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Net P&L</div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Net P&L (₹)</div>
             <div class="text-2xl sm:text-3xl font-black {{ $totalNetPnl > 0 ? 'text-emerald-600 dark:text-emerald-400' : ($totalNetPnl < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-slate-100') }}">
-                {{ $totalNetPnl >= 0 ? '+' : '' }}{{ number_format($totalNetPnl, 2) }}
+                {{ $totalNetPnl >= 0 ? '+₹' : '-₹' }}{{ number_format(abs($totalNetPnl), 2) }}
             </div>
             <div class="text-xs text-slate-400 mt-1">
-                Gross: <span class="font-semibold text-slate-600 dark:text-slate-300">{{ number_format($totalGrossPnl, 2) }}</span>
+                Gross: <span class="font-semibold text-slate-600 dark:text-slate-300">₹{{ number_format($totalGrossPnl, 2) }}</span>
             </div>
         </div>
 
@@ -62,9 +62,9 @@
 
         <!-- Total Charges -->
         <div class="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Charges</div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Charges (₹)</div>
             <div class="text-2xl sm:text-3xl font-black text-slate-700 dark:text-slate-200">
-                {{ number_format($totalCharges, 2) }}
+                ₹{{ number_format($totalCharges, 2) }}
             </div>
             <div class="text-xs text-slate-400 mt-1">Brokerage & exchange costs</div>
         </div>
@@ -136,7 +136,7 @@
                             <th class="py-4 px-4">Date & Time</th>
                             <th class="py-4 px-4">Execution (Qty × Entry)</th>
                             <th class="py-4 px-4">Exit Price</th>
-                            <th class="py-4 px-4 text-right">Net P&L</th>
+                            <th class="py-4 px-4 text-right">Net P&L (₹)</th>
                             <th class="py-4 px-4">Strategy</th>
                             <th class="py-4 px-4 text-center">Chart</th>
                             <th class="py-4 px-5 text-right">Actions</th>
@@ -150,7 +150,7 @@
                                 <td class="py-4 px-5 font-bold">
                                     <div class="flex items-center gap-2">
                                         <a href="{{ route('trades.show', $trade) }}" class="text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 font-extrabold text-base">
-                                            {{ $trade->instrument }}
+                                             {{ $trade->instrument }}
                                         </a>
                                         <span class="px-2 py-0.5 text-[10px] font-black uppercase rounded {{ $trade->direction === 'BUY' ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300' : 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300' }}">
                                             {{ $trade->direction === 'BUY' ? 'LONG' : 'SHORT' }}
@@ -186,10 +186,10 @@
                                 <!-- Net P&L -->
                                 <td class="py-4 px-4 text-right whitespace-nowrap">
                                     <div class="font-mono font-extrabold text-base {{ $trade->net_pnl > 0 ? 'text-emerald-600 dark:text-emerald-400' : ($trade->net_pnl < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-600 dark:text-slate-300') }}">
-                                        {{ $trade->net_pnl >= 0 ? '+' : '' }}{{ number_format($trade->net_pnl, 2) }}
+                                        {{ $trade->net_pnl >= 0 ? '+₹' : '-₹' }}{{ number_format(abs($trade->net_pnl), 2) }}
                                     </div>
                                     <div class="text-[10px] text-slate-400">
-                                        Fee: {{ number_format($trade->charges, 2) }}
+                                        Fee: ₹{{ number_format($trade->charges, 2) }}
                                     </div>
                                 </td>
 

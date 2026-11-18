@@ -216,7 +216,7 @@
                 <!-- Charges / Brokerage / Taxes -->
                 <div>
                     <label for="charges" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                        Charges & Brokerage
+                        Charges & Brokerage (₹)
                     </label>
                     <input type="number" 
                            step="0.01" 
@@ -233,21 +233,21 @@
             <div class="mt-6 p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full">
                     <div>
-                        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Gross P&L</div>
+                        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Gross P&L (₹)</div>
                         <div id="displayGrossPnl" class="text-xl font-extrabold text-slate-700 dark:text-slate-200">
-                            0.00
+                            ₹0.00
                         </div>
                     </div>
                     <div>
-                        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Charges</div>
+                        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Charges (₹)</div>
                         <div id="displayCharges" class="text-xl font-extrabold text-slate-600 dark:text-slate-300">
-                            40.00
+                            ₹40.00
                         </div>
                     </div>
                     <div>
-                        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Net P&L</div>
+                        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Net P&L (₹)</div>
                         <div id="displayNetPnl" class="text-2xl font-black text-slate-800 dark:text-slate-100">
-                            -40.00
+                            -₹40.00
                         </div>
                     </div>
                     <div>
@@ -367,7 +367,7 @@
                     </label>
                     <textarea id="lessons" 
                               name="lessons" 
-                              rows="3" 
+                              rows="5" 
                               placeholder="What went well? Did you follow your trading rules? What emotional state were you in?" 
                               class="w-full px-4 py-3.5 text-base rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">{{ old('lessons') }}</textarea>
                 </div>
@@ -379,7 +379,7 @@
                     </label>
                     <textarea id="remarks" 
                               name="remarks" 
-                              rows="2" 
+                              rows="5" 
                               placeholder="Market environment, high impact economic data, key support/resistance levels..." 
                               class="w-full px-4 py-3.5 text-base rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">{{ old('remarks') }}</textarea>
                 </div>
@@ -452,10 +452,10 @@
         const displayNet = document.getElementById('displayNetPnl');
         const displayCharges = document.getElementById('displayCharges');
 
-        displayCharges.textContent = charges.toFixed(2);
+        displayCharges.textContent = '₹' + charges.toFixed(2);
 
-        displayGross.textContent = (gross >= 0 ? '+' : '') + gross.toFixed(2);
-        displayNet.textContent = (net >= 0 ? '+' : '') + net.toFixed(2);
+        displayGross.textContent = (gross >= 0 ? '+₹' : '-₹') + Math.abs(gross).toFixed(2);
+        displayNet.textContent = (net >= 0 ? '+₹' : '-₹') + Math.abs(net).toFixed(2);
 
         if (net > 0) {
             displayNet.className = "text-2xl font-black text-emerald-600 dark:text-emerald-400";
