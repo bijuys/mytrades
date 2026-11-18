@@ -18,12 +18,14 @@ class User extends Authenticatable
         'last_name',
         'name',
         'email',
+        'email_verified_at',
         'password',
         'phone',
         'trading_experience',
         'agreed_to_terms',
         'role',
         'status',
+        'confirmation_token',
         'approved_at',
         'approved_by',
         'rejection_reason',
@@ -74,6 +76,16 @@ class User extends Authenticatable
         return $this->status === 'pending';
     }
 
+    public function isUnconfirmed(): bool
+    {
+        return $this->status === 'unconfirmed' || is_null($this->email_verified_at);
+    }
+
+    public function isEmailVerified(): bool
+    {
+        return ! is_null($this->email_verified_at);
+    }
+
     public function isRejected(): bool
     {
         return $this->status === 'rejected';
@@ -87,5 +99,20 @@ class User extends Authenticatable
     public function strategies(): HasMany
     {
         return $this->hasMany(Strategy::class);
+    }
+
+    public function sentMessages(): HasMany
+    {
+        return $this->hasMany(UserMessage::class, 'admin_id');
+    }
+
+    public function receivedMessages(): HasMany
+    {
+        return $this->hasMany(UserMessage::class, 'user_id');
+    }
+
+    public function newsletters(): HasMany
+    {
+        return $this->hasMany(Newsletter::class, 'admin_id');
     }
 }

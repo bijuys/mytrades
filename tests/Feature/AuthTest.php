@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Mail\WelcomeConfirmEmail;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
@@ -36,8 +38,10 @@ class AuthTest extends TestCase
         $response->assertSee('reg_eye_icon');
     }
 
-    public function test_user_can_signup_and_is_set_to_pending_approval(): void
+    public function test_user_can_signup_and_receives_welcome_confirmation_email(): void
     {
+        Mail::fake();
+
         $response = $this->post('/register', [
             'first_name' => 'Siddharth',
             'last_name' => 'Menon',
@@ -54,13 +58,103 @@ class AuthTest extends TestCase
 
         $this->assertDatabaseHas('users', [
             'email' => 'siddharth@example.com',
-            'status' => 'pending',
+            'status' => 'unconfirmed',
             'role' => 'user',
             'trading_experience' => 3,
+            'email_verified_at' => null,
         ]);
 
         $user = User::where('email', 'siddharth@example.com')->first();
+        $this->assertNotNull($user->confirmation_token);
         $this->assertCount(6, $user->strategies); // Default starter strategies created
+
+        Mail::assertSent(WelcomeConfirmEmail::class, function ($mail) use ($user) {
+            return $mail->hasTo('siddharth@example.com') &&
+                   str_contains($mail->confirmUrl, $user->confirmation_token);
+        });
+    }
+
+    public function test_user_can_confirm_email_and_is_then_submitted_for_admin_approval(): void
+    {
+        $user = User::create([
+            'first_name' => 'Siddharth',
+            'last_name' => 'Menon',
+            'name' => 'Siddharth Menon',
+            'email' => 'siddharth@example.com',
+            'password' => Hash::make('secret1234'),
+            'phone' => '+919876543210',
+            'trading_experience' => 3,
+            'agreed_to_terms' => true,
+            'role' => 'user',
+            'status' => 'unconfirmed',
+            'confirmation_token' => 'sample-test-token-abcdef123456',
+            'email_verified_at' => null,
+        ]);
+
+        $response = $this->get('/confirm-email/sample-test-token-abcdef123456');
+
+        $response->assertRedirect('/login');
+        $response->assertSessionHas('pending_notice');
+
+        $user->refresh();
+        $this->assertEquals('pending', $user->status);
+        $this->assertNotNull($user->email_verified_at);
+        $this->assertNull($user->confirmation_token);
+    }
+
+    public function test_unconfirmed_user_cannot_login_and_gets_warning(): void
+    {
+        $user = User::create([
+            'first_name' => 'Priya',
+            'last_name' => 'Nair',
+            'email' => 'priya@example.com',
+            'password' => Hash::make('secret1234'),
+            'phone' => '+919876543211',
+            'trading_experience' => 2,
+            'agreed_to_terms' => true,
+            'role' => 'user',
+            'status' => 'unconfirmed',
+            'confirmation_token' => 'token-1234',
+            'email_verified_at' => null,
+        ]);
+
+        $response = $this->post('/login', [
+            'email' => 'priya@example.com',
+            'password' => 'secret1234',
+        ]);
+
+        $this->assertGuest();
+        $response->assertSessionHas('warning');
+        $response->assertSessionHas('resend_email');
+    }
+
+    public function test_user_can_resend_confirmation_email(): void
+    {
+        Mail::fake();
+
+        $user = User::create([
+            'first_name' => 'Priya',
+            'last_name' => 'Nair',
+            'email' => 'priya@example.com',
+            'password' => Hash::make('secret1234'),
+            'phone' => '+919876543211',
+            'trading_experience' => 2,
+            'agreed_to_terms' => true,
+            'role' => 'user',
+            'status' => 'unconfirmed',
+            'confirmation_token' => 'token-1234',
+            'email_verified_at' => null,
+        ]);
+
+        $response = $this->post('/resend-confirmation', [
+            'email' => 'priya@example.com',
+        ]);
+
+        $response->assertSessionHas('status');
+
+        Mail::assertSent(WelcomeConfirmEmail::class, function ($mail) {
+            return $mail->hasTo('priya@example.com');
+        });
     }
 
     public function test_pending_user_cannot_login_and_gets_warning(): void
@@ -75,6 +169,7 @@ class AuthTest extends TestCase
             'agreed_to_terms' => true,
             'role' => 'user',
             'status' => 'pending',
+            'email_verified_at' => Carbon::now(),
         ]);
 
         $response = $this->post('/login', [
@@ -98,6 +193,7 @@ class AuthTest extends TestCase
             'agreed_to_terms' => true,
             'role' => 'user',
             'status' => 'approved',
+            'email_verified_at' => Carbon::now(),
             'approved_at' => Carbon::now(),
         ]);
 
@@ -122,6 +218,7 @@ class AuthTest extends TestCase
             'agreed_to_terms' => true,
             'role' => 'user',
             'status' => 'approved',
+            'email_verified_at' => Carbon::now(),
         ]);
 
         // 1. Visit forgot password page

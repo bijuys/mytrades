@@ -5,23 +5,51 @@
 @section('content')
 <div class="max-w-md mx-auto my-8">
     
-    <!-- Pending Approval Banner if redirected after signup -->
+    <!-- Pending Approval / Email Confirmation Banner -->
     @if(session('pending_notice'))
-        <div class="mb-6 p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/70 border-2 border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 shadow-lg shadow-amber-500/10">
+        <div class="mb-6 p-5 rounded-2xl {{ !empty(session('pending_notice')['confirmed']) ? 'bg-emerald-50 dark:bg-emerald-950/70 border-emerald-300 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200' : 'bg-indigo-50 dark:bg-indigo-950/70 border-indigo-300 dark:border-indigo-700 text-indigo-950 dark:text-indigo-200' }} border-2 shadow-lg">
             <div class="flex items-start gap-3">
-                <div class="p-2 bg-amber-200 dark:bg-amber-800 rounded-xl text-amber-800 dark:text-amber-100">
-                    <i class="fa-solid fa-clock text-xl"></i>
+                <div class="p-2 {{ !empty(session('pending_notice')['confirmed']) ? 'bg-emerald-200 dark:bg-emerald-800 text-emerald-800 dark:text-emerald-100' : 'bg-indigo-200 dark:bg-indigo-800 text-indigo-800 dark:text-indigo-100' }} rounded-xl">
+                    <i class="fa-solid {{ !empty(session('pending_notice')['confirmed']) ? 'fa-circle-check' : 'fa-envelope-open-text' }} text-xl"></i>
                 </div>
-                <div>
+                <div class="flex-1">
                     <h3 class="font-bold text-base">{{ session('pending_notice')['title'] }}</h3>
-                    <p class="text-sm mt-1 text-amber-800/90 dark:text-amber-200/90 leading-relaxed">
+                    <p class="text-sm mt-1 text-slate-700 dark:text-slate-300 leading-relaxed">
                         {{ session('pending_notice')['message'] }}
                     </p>
-                    <div class="mt-3 text-xs font-semibold px-2.5 py-1 bg-amber-100 dark:bg-amber-900/60 rounded-md inline-block">
-                        Account: {{ session('pending_notice')['email'] }}
+                    <div class="mt-3 flex flex-wrap items-center gap-2">
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 inline-block">
+                            Account: {{ session('pending_notice')['email'] }}
+                        </span>
+                        @if(!empty(session('pending_notice')['unconfirmed']))
+                            <a href="{{ route('verification.resend.show', ['email' => session('pending_notice')['email']]) }}" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                                Resend Email &rarr;
+                            </a>
+                        @endif
                     </div>
                 </div>
             </div>
+        </div>
+    @endif
+
+    @if(session('resend_email'))
+        <div class="mb-6 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/70 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 text-xs flex items-center justify-between gap-3">
+            <div>
+                <i class="fa-solid fa-triangle-exclamation mr-1 text-amber-500"></i>
+                Didn't get the welcome email?
+            </div>
+            <a href="{{ route('verification.resend.show', ['email' => session('resend_email')]) }}" class="font-bold underline text-amber-800 dark:text-amber-300 hover:text-amber-950">
+                Resend Confirmation Link
+            </a>
+        </div>
+    @endif
+
+    @if(session('dev_confirm_url'))
+        <div class="mb-6 p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/70 border border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-200 text-xs">
+            <span class="font-bold bg-blue-200 dark:bg-blue-800 px-2 py-0.5 rounded text-[10px] mr-1 uppercase">Dev Simulator</span>
+            <a href="{{ session('dev_confirm_url') }}" class="underline font-bold text-blue-700 dark:text-blue-300">
+                Click here to simulate confirming email &rarr;
+            </a>
         </div>
     @endif
 

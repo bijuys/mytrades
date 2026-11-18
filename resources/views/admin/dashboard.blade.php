@@ -62,8 +62,13 @@
             <div class="text-3xl font-black {{ $pendingUsersCount > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-white' }}">
                 {{ $pendingUsersCount }}
             </div>
-            <div class="text-xs text-slate-400 mt-1">
-                {{ $pendingUsersCount > 0 ? 'Action required by admin' : 'All registrations reviewed' }}
+            <div class="text-xs text-slate-400 mt-1 flex items-center justify-between">
+                <span>{{ $pendingUsersCount > 0 ? 'Email confirmed, action required' : 'All registrations reviewed' }}</span>
+                @if($unconfirmedUsersCount > 0)
+                    <a href="{{ route('admin.users', ['status' => 'unconfirmed']) }}" class="text-[11px] font-bold text-slate-400 hover:text-indigo-500">
+                        ({{ $unconfirmedUsersCount }} unconfirmed)
+                    </a>
+                @endif
             </div>
         </div>
 
@@ -105,9 +110,9 @@
         <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100 dark:border-slate-800">
             <div>
                 <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <i class="fa-solid fa-user-clock text-amber-500"></i> Pending User Approvals
+                    <i class="fa-solid fa-user-clock text-amber-500"></i> Pending User Approvals (Email Confirmed)
                 </h2>
-                <p class="text-xs text-slate-400 mt-0.5">New signups awaiting your Super Admin approval before they can log in</p>
+                <p class="text-xs text-slate-400 mt-0.5">Traders who verified their email and are awaiting your Super Admin approval before they can log in</p>
             </div>
             <a href="{{ route('admin.users', ['status' => 'pending']) }}" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
                 View All Users &rarr;

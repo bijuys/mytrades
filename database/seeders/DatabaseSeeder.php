@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             'agreed_to_terms' => true,
             'role' => 'admin',
             'status' => 'approved',
+            'email_verified_at' => Carbon::now(),
             'approved_at' => Carbon::now(),
         ]);
 
@@ -43,11 +44,12 @@ class DatabaseSeeder extends Seeder
             'agreed_to_terms' => true,
             'role' => 'user',
             'status' => 'approved',
+            'email_verified_at' => Carbon::now()->subDays(30),
             'approved_at' => Carbon::now()->subDays(30),
             'approved_by' => $admin->id,
         ]);
 
-        // 3. Create Pending User (to demo Admin approval flow)
+        // 3. Create Pending User (Confirmed email, awaiting Admin approval)
         User::create([
             'first_name' => 'Amit',
             'last_name' => 'Patel',
@@ -59,9 +61,10 @@ class DatabaseSeeder extends Seeder
             'agreed_to_terms' => true,
             'role' => 'user',
             'status' => 'pending',
+            'email_verified_at' => Carbon::now()->subHours(2),
         ]);
 
-        // Another pending user
+        // 4. Create Unconfirmed User (Signed up, yet to click confirm email link)
         User::create([
             'first_name' => 'Pooja',
             'last_name' => 'Iyer',
@@ -72,7 +75,9 @@ class DatabaseSeeder extends Seeder
             'trading_experience' => 5,
             'agreed_to_terms' => true,
             'role' => 'user',
-            'status' => 'pending',
+            'status' => 'unconfirmed',
+            'confirmation_token' => 'pooja-demo-token-12345',
+            'email_verified_at' => null,
         ]);
 
         // 4. Create Strategies for the Trader

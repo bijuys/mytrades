@@ -217,4 +217,24 @@ class TradeJournalTest extends TestCase
             'name' => 'Custom VWAP Bounce',
         ]);
     }
+
+    public function test_trade_screenshot_url_attribute(): void
+    {
+        $trade = Trade::create([
+            'user_id' => $this->user->id,
+            'strategy_id' => $this->strategy->id,
+            'instrument' => 'NIFTY',
+            'direction' => 'BUY',
+            'entry_datetime' => Carbon::now(),
+            'quantity' => 25,
+            'entry_price' => 22000.00,
+            'screenshot' => 'trades/sample.webp',
+        ]);
+
+        config(['filesystems.default' => 'public']);
+        $this->assertStringContainsString('trades/sample.webp', $trade->screenshot_url);
+
+        $trade->screenshot = 'https://example.com/chart.png';
+        $this->assertEquals('https://example.com/chart.png', $trade->screenshot_url);
+    }
 }

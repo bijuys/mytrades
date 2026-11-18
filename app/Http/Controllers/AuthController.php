@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\ResetPasswordMail;
+use App\Mail\WelcomeConfirmEmail;
 use App\Models\Strategy;
 use App\Models\User;
 use Carbon\Carbon;
@@ -54,9 +55,15 @@ class AuthController extends Controller
 
         // Check approval status (Super Admin bypasses check)
         if (! $user->isAdmin()) {
+            if ($user->status === 'unconfirmed' || is_null($user->email_verified_at)) {
+                return back()->withInput($request->only('email'))
+                    ->with('warning', 'Please confirm your email address before your account can be submitted for Super Admin approval. Check your inbox for the confirmation link.')
+                    ->with('resend_email', $user->email);
+            }
+
             if ($user->isPending()) {
                 return back()->withInput($request->only('email'))
-                    ->with('warning', 'Your registration is awaiting Super Admin approval. Please check back shortly or contact your administrator.');
+                    ->with('warning', 'Your email is confirmed and your registration is currently awaiting Super Admin approval. Please check back shortly or contact your administrator.');
             }
 
             if ($user->isRejected()) {
@@ -121,6 +128,8 @@ class AuthController extends Controller
         // Clean Indian phone number formatting
         $cleanPhone = preg_replace('/[^\d+]/', '', $validated['phone']);
 
+        $confirmationToken = Str::random(64);
+
         $user = User::create([
             'first_name' => $validated['first_name'],
             'last_name' => $validated['last_name'],
@@ -131,7 +140,9 @@ class AuthController extends Controller
             'trading_experience' => $validated['trading_experience'],
             'agreed_to_terms' => true,
             'role' => 'user',
-            'status' => 'pending', // Signup requires Admin approval
+            'status' => 'unconfirmed', // Must confirm email before Admin review
+            'confirmation_token' => $confirmationToken,
+            'email_verified_at' => null,
         ]);
 
         // Seed default starter strategies for this new user
@@ -154,11 +165,21 @@ class AuthController extends Controller
             ]);
         }
 
+        $confirmUrl = route('email.confirm', ['token' => $confirmationToken]);
+
+        // Dispatch warm welcome & confirmation email
+        try {
+            Mail::to($user->email)->send(new WelcomeConfirmEmail($user, $confirmUrl));
+        } catch (\Throwable $e) {
+            Log::warning('Welcome email dispatch note: '.$e->getMessage());
+        }
+
         return redirect()->route('login')->with('pending_notice', [
-            'title' => 'Registration Successful!',
-            'message' => "Thank you for signing up, {$user->first_name}! Your account has been created and is now awaiting Super Admin approval. You will be able to log in and access your trading journal once an administrator approves your account.",
+            'title' => 'Welcome to MyTrades! Please Confirm Your Email',
+            'message' => "Thank you for signing up, {$user->first_name}! We have sent a welcome email to {$user->email}. Please click the 'Confirm Email' button inside to confirm your signup. Once confirmed, your registration will be submitted for Super Admin approval.",
             'email' => $user->email,
-        ]);
+            'unconfirmed' => true,
+        ])->with('dev_confirm_url', $confirmUrl);
     }
 
     /**
@@ -282,6 +303,80 @@ class AuthController extends Controller
     public function showResetThanks(): View
     {
         return view('auth.thanks');
+    }
+
+    /**
+     * Confirm user email address from the welcome email link.
+     */
+    public function confirmEmail(string $token): RedirectResponse
+    {
+        $user = User::where('confirmation_token', $token)->first();
+
+        if (! $user) {
+            return redirect()->route('login')
+                ->with('warning', 'This email confirmation link is invalid or has already been used. If your account has been approved by the Super Admin, you can log in below.');
+        }
+
+        $user->update([
+            'email_verified_at' => Carbon::now(),
+            'confirmation_token' => null,
+            'status' => 'pending', // Transition from 'unconfirmed' to 'pending' admin review!
+        ]);
+
+        return redirect()->route('login')->with('pending_notice', [
+            'title' => 'Email Confirmed Successfully! 🎉',
+            'message' => "Thank you, {$user->first_name}! Your email address ({$user->email}) is now verified. Your application has been submitted to the Super Admin for review and approval. You will be able to log in as soon as an administrator approves your account.",
+            'email' => $user->email,
+            'confirmed' => true,
+        ]);
+    }
+
+    /**
+     * Show form to resend confirmation email.
+     */
+    public function showResendConfirmation(): View
+    {
+        return view('auth.resend-confirmation');
+    }
+
+    /**
+     * Resend Welcome & Confirmation Email.
+     */
+    public function resendConfirmation(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        $email = strtolower($request->email);
+        $user = User::where('email', $email)->first();
+
+        if (! $user) {
+            return back()->with('status', 'If an unconfirmed registration exists with that email address, we have resent the confirmation link.');
+        }
+
+        if ($user->isEmailVerified() && $user->status !== 'unconfirmed') {
+            return redirect()->route('login')
+                ->with('info', 'Your email is already confirmed! If you are awaiting approval, our administrators will review your profile shortly.');
+        }
+
+        // Generate a new token if not present
+        if (empty($user->confirmation_token)) {
+            $user->confirmation_token = Str::random(64);
+            $user->status = 'unconfirmed';
+            $user->save();
+        }
+
+        $confirmUrl = route('email.confirm', ['token' => $user->confirmation_token]);
+
+        try {
+            Mail::to($user->email)->send(new WelcomeConfirmEmail($user, $confirmUrl));
+        } catch (\Throwable $e) {
+            Log::warning('Resend confirmation email failed: '.$e->getMessage());
+        }
+
+        return back()->with('status', "We have resent the welcome and confirmation email to {$user->email}! Please check your inbox.")
+            ->with('dev_confirm_url', $confirmUrl);
     }
 
     /**

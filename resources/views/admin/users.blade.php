@@ -30,6 +30,9 @@
         <a href="{{ route('admin.users', ['status' => 'pending']) }}" class="px-3.5 py-2 rounded-xl transition-colors {{ request('status') === 'pending' ? 'bg-amber-600 text-white shadow-sm' : 'text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/60' }}">
             <i class="fa-solid fa-clock mr-1"></i> Pending Approval ({{ $counts['pending'] }})
         </a>
+        <a href="{{ route('admin.users', ['status' => 'unconfirmed']) }}" class="px-3.5 py-2 rounded-xl transition-colors {{ request('status') === 'unconfirmed' ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800' }}">
+            <i class="fa-regular fa-envelope mr-1"></i> Unconfirmed Email ({{ $counts['unconfirmed'] }})
+        </a>
         <a href="{{ route('admin.users', ['status' => 'approved']) }}" class="px-3.5 py-2 rounded-xl transition-colors {{ request('status') === 'approved' ? 'bg-emerald-600 text-white shadow-sm' : 'text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/60' }}">
             <i class="fa-solid fa-check mr-1"></i> Approved ({{ $counts['approved'] }})
         </a>
@@ -132,9 +135,13 @@
                                         <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5 w-fit">
                                             <i class="fa-solid fa-circle-check text-[10px]"></i> Approved
                                         </span>
+                                    @elseif($user->isUnconfirmed())
+                                        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700 flex items-center gap-1.5 w-fit" title="User has not clicked the email confirmation link yet">
+                                            <i class="fa-regular fa-envelope text-[10px]"></i> Unconfirmed
+                                        </span>
                                     @elseif($user->status === 'pending')
-                                        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-center gap-1.5 w-fit animate-pulse">
-                                            <i class="fa-solid fa-clock text-[10px]"></i> Pending Approval
+                                        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-center gap-1.5 w-fit animate-pulse" title="Email verified, ready for admin review">
+                                            <i class="fa-solid fa-clock text-[10px]"></i> Awaiting Approval
                                         </span>
                                     @elseif($user->status === 'rejected')
                                         <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 flex items-center gap-1.5 w-fit">
@@ -177,6 +184,11 @@
                                 <td class="py-4 px-5 text-right whitespace-nowrap">
                                     <div class="flex items-center justify-end gap-1.5">
                                         
+                                        <!-- Contact / Message User -->
+                                        <a href="{{ route('admin.messages.index', ['user_id' => $user->id]) }}" class="p-1.5 rounded-lg text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800" title="Contact {{ $user->first_name }} Directly">
+                                            <i class="fa-solid fa-envelope text-xs"></i>
+                                        </a>
+
                                         <!-- Approve Action -->
                                         @if($user->status !== 'approved')
                                             <form method="POST" action="{{ route('admin.users.approve', $user) }}" class="inline">

@@ -230,6 +230,12 @@
                     <a href="{{ route('admin.trades') }}" class="px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.trades*') ? 'bg-indigo-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800' }}">
                         <i class="fa-solid fa-list-check mr-1"></i> All Platform Trades
                     </a>
+                    <a href="{{ route('admin.newsletter.index') }}" class="px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.newsletter*') ? 'bg-indigo-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800' }}">
+                        <i class="fa-solid fa-paper-plane mr-1"></i> Newsletter
+                    </a>
+                    <a href="{{ route('admin.messages.index') }}" class="px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.messages*') ? 'bg-indigo-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800' }}">
+                        <i class="fa-solid fa-envelope mr-1"></i> Messages
+                    </a>
                 </div>
                 <div class="text-slate-500 text-[11px] hidden md:block">
                     Super Admin Console

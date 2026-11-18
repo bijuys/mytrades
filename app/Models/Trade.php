@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class Trade extends Model
 {
@@ -82,7 +83,20 @@ class Trade extends Model
             return null;
         }
 
-        return asset('storage/'.$this->screenshot);
+        if (str_starts_with($this->screenshot, 'http://') || str_starts_with($this->screenshot, 'https://')) {
+            return $this->screenshot;
+        }
+
+        $disk = config('filesystems.default');
+        if ($disk === 's3') {
+            try {
+                return Storage::disk('s3')->temporaryUrl($this->screenshot, now()->addHours(24));
+            } catch (\Throwable) {
+                return Storage::disk('s3')->url($this->screenshot);
+            }
+        }
+
+        return Storage::disk('public')->url($this->screenshot);
     }
 
     public function getDisplayStrategyAttribute(): string

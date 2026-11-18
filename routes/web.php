@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminMessageController;
+use App\Http\Controllers\AdminNewsletterController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StrategyController;
@@ -37,6 +39,11 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+
+    // Email Confirmation & Resend
+    Route::get('/confirm-email/{token}', [AuthController::class, 'confirmEmail'])->name('email.confirm');
+    Route::get('/resend-confirmation', [AuthController::class, 'showResendConfirmation'])->name('verification.resend.show');
+    Route::post('/resend-confirmation', [AuthController::class, 'resendConfirmation'])->name('verification.resend');
 });
 
 Route::get('/password/thanks', [AuthController::class, 'showResetThanks'])->name('password.thanks');
@@ -70,4 +77,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Platform-wide Trade Journal Audit
     Route::get('/trades', [AdminController::class, 'trades'])->name('trades');
     Route::delete('/trades/{trade}', [AdminController::class, 'deleteTrade'])->name('trades.delete');
+
+    // Newsletter Broadcasting Facility
+    Route::get('/newsletter', [AdminNewsletterController::class, 'index'])->name('newsletter.index');
+    Route::post('/newsletter/send', [AdminNewsletterController::class, 'send'])->name('newsletter.send');
+    Route::post('/newsletter/test', [AdminNewsletterController::class, 'sendTest'])->name('newsletter.test');
+
+    // Direct User Messaging Interface
+    Route::get('/messages', [AdminMessageController::class, 'index'])->name('messages.index');
+    Route::post('/messages', [AdminMessageController::class, 'send'])->name('messages.send');
+    Route::delete('/messages/{message}', [AdminMessageController::class, 'destroy'])->name('messages.destroy');
 });

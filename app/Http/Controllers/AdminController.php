@@ -23,13 +23,15 @@ class AdminController extends Controller
     public function dashboard(): View
     {
         $totalUsers = User::count();
-        $pendingUsersCount = User::where('status', 'pending')->count();
+        $pendingUsersCount = User::where('status', 'pending')->whereNotNull('email_verified_at')->count();
+        $unconfirmedUsersCount = User::where('status', 'unconfirmed')->orWhereNull('email_verified_at')->where('role', '!=', 'admin')->count();
         $approvedUsersCount = User::where('status', 'approved')->count();
         $totalTrades = Trade::count();
         $totalPlatformPnl = Trade::sum('net_pnl');
 
-        // Recent registrations needing approval
+        // Recent email-confirmed registrations needing Super Admin review
         $pendingUsers = User::where('status', 'pending')
+            ->whereNotNull('email_verified_at')
             ->orderBy('created_at', 'desc')
             ->take(8)
             ->get();
@@ -43,6 +45,7 @@ class AdminController extends Controller
         return view('admin.dashboard', compact(
             'totalUsers',
             'pendingUsersCount',
+            'unconfirmedUsersCount',
             'approvedUsersCount',
             'totalTrades',
             'totalPlatformPnl',
@@ -60,7 +63,13 @@ class AdminController extends Controller
 
         // Filter by Status
         if ($status = $request->input('status')) {
-            if ($status !== 'all') {
+            if ($status === 'pending') {
+                $query->where('status', 'pending')->whereNotNull('email_verified_at');
+            } elseif ($status === 'unconfirmed') {
+                $query->where(function ($q) {
+                    $q->where('status', 'unconfirmed')->orWhereNull('email_verified_at');
+                })->where('role', '!=', 'admin');
+            } elseif ($status !== 'all') {
                 $query->where('status', $status);
             }
         }
@@ -85,7 +94,10 @@ class AdminController extends Controller
 
         $counts = [
             'all' => User::count(),
-            'pending' => User::where('status', 'pending')->count(),
+            'pending' => User::where('status', 'pending')->whereNotNull('email_verified_at')->count(),
+            'unconfirmed' => User::where(function ($q) {
+                $q->where('status', 'unconfirmed')->orWhereNull('email_verified_at');
+            })->where('role', '!=', 'admin')->count(),
             'approved' => User::where('status', 'approved')->count(),
             'rejected' => User::where('status', 'rejected')->count(),
             'suspended' => User::where('status', 'suspended')->count(),
@@ -102,6 +114,8 @@ class AdminController extends Controller
     {
         $user->update([
             'status' => 'approved',
+            'email_verified_at' => $user->email_verified_at ?? Carbon::now(),
+            'confirmation_token' => null,
             'approved_at' => Carbon::now(),
             'approved_by' => Auth::id(),
             'rejection_reason' => null,
