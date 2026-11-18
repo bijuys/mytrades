@@ -176,20 +176,31 @@
                     </button>
 
                     @auth
-                        <!-- User Profile & Logout Dropdown -->
+                        <!-- User Profile & Logout -->
                         <div class="relative flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-800">
-                            <div class="text-right hidden sm:block">
-                                <div class="text-sm font-bold text-slate-800 dark:text-slate-200 leading-tight">
-                                    {{ auth()->user()->first_name }} {{ auth()->user()->last_name }}
+                            <a href="{{ route('profile.edit') }}" class="flex items-center gap-2.5 p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group" title="Account Settings & Profile">
+                                <!-- Avatar or Fallback Initials -->
+                                @if(auth()->user()->avatar_url)
+                                    <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->full_name }}" class="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-700 shadow-sm shrink-0 group-hover:ring-2 group-hover:ring-indigo-500 transition-all">
+                                @else
+                                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-extrabold text-xs flex items-center justify-center shadow-sm shrink-0 uppercase tracking-wider group-hover:ring-2 group-hover:ring-indigo-500 transition-all">
+                                        {{ auth()->user()->initials }}
+                                    </div>
+                                @endif
+
+                                <div class="text-left hidden sm:block">
+                                    <div class="text-sm font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                        {{ auth()->user()->first_name }} {{ auth()->user()->last_name }}
+                                    </div>
+                                    <div class="text-[11px] text-slate-400 flex items-center gap-1">
+                                        @if(auth()->user()->isAdmin())
+                                            <span class="inline-block px-1.5 py-0.2 bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 text-[10px] font-bold rounded">ADMIN</span>
+                                        @else
+                                            <span>{{ auth()->user()->trading_experience }} yrs exp</span>
+                                        @endif
+                                    </div>
                                 </div>
-                                <div class="text-[11px] text-slate-400 flex items-center justify-end gap-1">
-                                    @if(auth()->user()->isAdmin())
-                                        <span class="inline-block px-1.5 py-0.2 bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 text-[10px] font-bold rounded">ADMIN</span>
-                                    @else
-                                        <span>{{ auth()->user()->trading_experience }} yrs exp</span>
-                                    @endif
-                                </div>
-                            </div>
+                            </a>
 
                             <form method="POST" action="{{ route('logout') }}" class="inline">
                                 @csrf

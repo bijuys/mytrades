@@ -124,9 +124,13 @@
                 @foreach($pendingUsers as $pUser)
                     <div class="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div class="flex items-start sm:items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-bold flex items-center justify-center flex-shrink-0">
-                                {{ strtoupper(substr($pUser->first_name, 0, 1) . substr($pUser->last_name, 0, 1)) }}
-                            </div>
+                            @if($pUser->avatar_url)
+                                <img src="{{ $pUser->avatar_url }}" alt="{{ $pUser->full_name }}" class="w-10 h-10 rounded-full object-cover border border-amber-200 dark:border-amber-800 shrink-0">
+                            @else
+                                <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-bold flex items-center justify-center shrink-0 uppercase tracking-wider text-xs">
+                                    {{ $pUser->initials }}
+                                </div>
+                            @endif
                             <div>
                                 <div class="font-extrabold text-slate-900 dark:text-white text-base">
                                     {{ $pUser->full_name }}

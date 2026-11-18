@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminMessageController;
 use App\Http\Controllers\AdminNewsletterController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StrategyController;
 use App\Http\Controllers\TradeJournalController;
 use Illuminate\Support\Facades\Route;
@@ -48,6 +49,14 @@ Route::middleware('guest')->group(function () {
 
 Route::get('/password/thanks', [AuthController::class, 'showResetThanks'])->name('password.thanks');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+// Profile & Account Management
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
 // Section 2: User Area (Requires Auth & Super Admin Approval)
 Route::middleware(['auth', 'approved'])->group(function () {

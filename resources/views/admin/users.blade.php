@@ -100,9 +100,13 @@
                                 <!-- User Profile -->
                                 <td class="py-4 px-5">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-full {{ $user->isAdmin() ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/60 dark:text-purple-300' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300' }} font-bold flex items-center justify-center flex-shrink-0 text-xs">
-                                            {{ strtoupper(substr($user->first_name, 0, 1) . substr($user->last_name, 0, 1)) }}
-                                        </div>
+                                        @if($user->avatar_url)
+                                            <img src="{{ $user->avatar_url }}" alt="{{ $user->full_name }}" class="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-700 shrink-0">
+                                        @else
+                                            <div class="w-9 h-9 rounded-full {{ $user->isAdmin() ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/60 dark:text-purple-300' : 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white' }} font-bold flex items-center justify-center shrink-0 text-xs uppercase tracking-wider">
+                                                {{ $user->initials }}
+                                            </div>
+                                        @endif
                                         <div>
                                             <div class="font-extrabold text-sm text-slate-900 dark:text-white">
                                                 {{ $user->full_name }}

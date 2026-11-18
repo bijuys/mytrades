@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -20,6 +21,7 @@ class User extends Authenticatable
         'email',
         'email_verified_at',
         'password',
+        'avatar',
         'phone',
         'trading_experience',
         'agreed_to_terms',
@@ -59,6 +61,44 @@ class User extends Authenticatable
     public function getFullNameAttribute(): string
     {
         return trim(($this->first_name ?? '').' '.($this->last_name ?? '')) ?: ($this->name ?? '');
+    }
+
+    public function getInitialsAttribute(): string
+    {
+        $first = ! empty($this->first_name) ? mb_substr(trim($this->first_name), 0, 1) : '';
+        $last = ! empty($this->last_name) ? mb_substr(trim($this->last_name), 0, 1) : '';
+
+        if ($first === '' && $last === '' && ! empty($this->name)) {
+            $parts = preg_split('/\s+/', trim($this->name));
+            $first = mb_substr($parts[0] ?? '', 0, 1);
+            $last = isset($parts[1]) ? mb_substr($parts[1], 0, 1) : '';
+        }
+
+        $initials = mb_strtoupper($first.$last);
+
+        return $initials ?: 'U';
+    }
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if (! $this->avatar) {
+            return null;
+        }
+
+        if (str_starts_with($this->avatar, 'http://') || str_starts_with($this->avatar, 'https://')) {
+            return $this->avatar;
+        }
+
+        $disk = config('filesystems.default');
+        if ($disk === 's3') {
+            try {
+                return Storage::disk('s3')->temporaryUrl($this->avatar, now()->addHours(24));
+            } catch (\Throwable) {
+                return Storage::disk('s3')->url($this->avatar);
+            }
+        }
+
+        return Storage::disk('public')->url($this->avatar);
     }
 
     public function isAdmin(): bool
